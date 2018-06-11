@@ -1,86 +1,210 @@
-## Unit 5 | Assignment - The Power of Plots
 
-## Background
 
-What good is data without a good plot to tell the story?
+```python
+#Andrew Kling
+#UNCC HW#5 - Visualization of ride sharing data
 
-So, let's take what you've learned about Python Matplotlib and apply it to some real-world situations. For this assignment, you'll need to complete **1 of 2** Data Challenges. As always, it's your choice which you complete. _Perhaps_, choose the one most relevant to your future career.
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+plt.rcParams['lines.markeredgewidth'] = 1
+```
 
-## Option 1: Pyber
 
-![Ride](Images/Ride.png)
+```python
+#import data into dataframes
+city_df = pd.read_csv(os.path.join("raw_data","city_data.csv"))
+ride_df = pd.read_csv(os.path.join("raw_data","ride_data.csv"))
+#merge two dataframes into one
+data_df = ride_df.merge(city_df, how='left',on="city")
+data_df.head()
+```
 
-The ride sharing bonanza continues! Seeing the success of notable players like Uber and Lyft, you've decided to join a fledgling ride sharing company of your own. In your latest capacity, you'll be acting as Chief Data Strategist for the company. In this role, you'll be expected to offer data-backed guidance on new opportunities for market differentiation.
 
-You've since been given access to the company's complete recordset of rides. This contains information about every active driver and historic ride, including details like city, driver count, individual fares, and city type.
 
-Your objective is to build a [Bubble Plot](https://en.wikipedia.org/wiki/Bubble_chart) that showcases the relationship between four key variables:
 
-* Average Fare ($) Per City
-* Total Number of Rides Per City
-* Total Number of Drivers Per City
-* City Type (Urban, Suburban, Rural)
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
 
-In addition, you will be expected to produce the following three pie charts:
+    .dataframe thead th {
+        text-align: left;
+    }
 
-* % of Total Fares by City Type
-* % of Total Rides by City Type
-* % of Total Drivers by City Type
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>city</th>
+      <th>date</th>
+      <th>fare</th>
+      <th>ride_id</th>
+      <th>driver_count</th>
+      <th>type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Lake Jonathanshire</td>
+      <td>2018-01-14 10:14:22</td>
+      <td>13.83</td>
+      <td>5739410935873</td>
+      <td>5</td>
+      <td>Urban</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>South Michelleport</td>
+      <td>2018-03-04 18:24:09</td>
+      <td>30.24</td>
+      <td>2343912425577</td>
+      <td>72</td>
+      <td>Urban</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Port Samanthamouth</td>
+      <td>2018-02-24 04:29:00</td>
+      <td>33.44</td>
+      <td>2005065760003</td>
+      <td>57</td>
+      <td>Urban</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Rodneyfort</td>
+      <td>2018-02-10 23:22:03</td>
+      <td>23.44</td>
+      <td>5149245426178</td>
+      <td>34</td>
+      <td>Urban</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>South Jack</td>
+      <td>2018-03-06 04:28:35</td>
+      <td>34.58</td>
+      <td>3908451377344</td>
+      <td>46</td>
+      <td>Urban</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
-As final considerations:
 
-* You must use the Pandas Library and the Jupyter Notebook.
-* You must use the Matplotlib and Seaborn libraries.
-* You must include a written description of three observable trends based on the data.
-* You must use proper labeling of your plots, including aspects like: Plot Titles, Axes Labels, Legend Labels, Wedge Percentages, and Wedge Labels.
-* Remember when making your plots to consider aesthetics!
-  * You must stick to the Pyber color scheme (Gold, Light Sky Blue, and Light Coral) in producing your plot and pie charts.
-  * When making your Bubble Plot, experiment with effects like `alpha`, `edgecolor`, and `linewidths`.
-  * When making your Pie Chart, experiment with effects like `shadow`, `startangle`, and `explosion`.
-* You must include an exported markdown version of your Notebook called  `README.md` in your GitHub repository.
-* See [Example Solution](Pyber/Pyber_Example.pdf) for a reference on expected format.
 
-## Option 2: Pymaceuticals Inc
 
-![Laboratory](Images/Laboratory.jpg)
+```python
+#get total number of riders per city and reformat dataframe
+total_rides = pd.DataFrame(data_df["city"].value_counts())
+total_rides = total_rides.reset_index()
+total_rides = total_rides.rename(index=str, columns={"index": "city", "city": "total_rides"})
 
-While your data companions rushed off to jobs in finance and government, you remained adamant that science was the way for you. Staying true to your mission, you've since joined Pymaceuticals Inc., a burgeoning pharmaceutical company based out of San Diego, CA. Pymaceuticals specializes in drug-based, anti-cancer pharmaceuticals. In their most recent efforts, they've since begun screening for potential treatments to squamous cell carcinoma (SCC), a commonly occurring form of skin cancer.
+#get average fare per city and reformat dataframe
+avg_fare = pd.DataFrame(data_df.groupby(["city"])["fare"].mean())
+avg_fare = avg_fare.reset_index()
+avg_fare = avg_fare.rename(index=str, columns={"fare":"avg_fare"})
 
-As their Chief Data Analyst, you've been given access to the complete data from their most recent animal study. In this study, 250 mice were treated through a variety of drug regimes over the course of 45 days. Their physiological responses were then monitored over the course of that time. Your objective is to analyze the data to show how four treatments (Capomulin, Infubinol, Ketapril, and Placebo) compare.
+#merge all data for bubble chart into one dataframe
+plot_df = city_df.merge(total_rides, how='left',on='city')
+plot_df = plot_df.merge(avg_fare, how='left',on='city')
+```
 
-To do this you are tasked with:
 
-* Creating a scatter plot that shows how the tumor volume changes over time for each treatment.
-* Creating a scatter plot that shows how the number of [metastatic](https://en.wikipedia.org/wiki/Metastasis) (cancer spreading) sites changes over time for each treatment.
-* Creating a scatter plot that shows the number of mice still alive through the course of treatment (Survival Rate)
-* Creating a bar graph that compares the total % tumor volume change for each drug across the full 45 days.
+```python
+sizes = [100,150,200,250,300,350,400,450]
+marker_size = pd.cut(plot_df["driver_count"], [0,10,20,30,40,50,60,70,80],labels=sizes)
 
-As final considerations:
+sns.lmplot("total_rides","avg_fare",data=plot_df,palette={"Urban":"gold","Suburban":"lightcoral","Rural":"skyblue"},hue='type',
+           legend_out=True,fit_reg=False,scatter_kws={'s':marker_size,'alpha':0.6,'edgecolor':'k'},size=10)
 
-* You must use the Pandas Library and the Jupyter Notebook.
-* You must use the Matplotlib and Seaborn libraries.
-* You must include a written description of three observable trends based on the data.
-* You must use proper labeling of your plots, including aspects like: Plot Titles, Axes Labels, Legend Labels, X and Y Axis Limits, etc.
-* Your scatter plots must include [error bars](https://en.wikipedia.org/wiki/Error_bar). This will allow the company to account for variability between mice. You may want to look into [`pandas.DataFrame.sem`](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sem.html) for ideas on how to calculate this.
-* Remember when making your plots to consider aesthetics!
-  * Your legends should not be overlaid on top of any data.
-  * Your bar graph should indicate tumor growth as red and tumor reduction as green.
-    It should also include a label with the percentage change for each bar. You may want to consult this [tutorial](http://composition.al/blog/2015/11/29/a-better-way-to-add-labels-to-bar-charts-with-matplotlib/) for relevant code snippets.
-* You must include an exported markdown version of your Notebook called  `README.md` in your GitHub repository.
-* See [Example Solution](Pymaceuticals/Pymaceuticals_Example.pdf) for a reference on expected format. (Note: For this example, you are not required to match the tables or data frames included. Your only goal is to build the scatter plots and bar graphs. Consider the tables to be potential clues, but feel free to approach this problem, however, you like.)
+plt.rc('font',size=18)
+plt.rc('font', size=18)          # controls default text sizes
+plt.rc('axes', titlesize=18)     # fontsize of the axes title
+plt.rc('axes', labelsize=18)    # fontsize of the x and y labels
+plt.rc('figure', titlesize=18)  # fontsize of the figure title
 
-## Hints and Considerations
 
-* Be warned: These are very challenging tasks. Be patient with yourself as you trudge through these problems. They will take time and there is no shame in fumbling along the way. Data visualization is equal parts exploration, equal parts resolution.
+plt.title("Pyber Ride Sharing Data (2016)")
+plt.xlabel("Total Number of Riders (Per City)")
+plt.ylabel("Average Fare ($)")
+plt.show()
+```
 
-* Between these two exercises, the Pymaceuticals one is significantly more challenging. So choose that one only if you feel somewhat comfortable with the material covered so far. The Pymaceuticals example _will_ require you to research a good bit on your own for hacked solutions to problems you'll experience along the way. If you end up choosing this exercise, feel encouraged to constantly refer back to Stack Overflow and the Pandas Documentation. These are needed tools in every data analyst's arsenl.
 
-* Don't get bogged down in small details. Always focus on the big picture. If you can't figure out how to get a label to show up correctly, come back to it. Focus on getting the core skeleton of your notebook complete. You can always re-visit old problems.
+![png](output_3_0.png)
 
-* Remember: There are many ways to skin a cat, and similarly there are many ways to approach a data problem. The key throughout, however, is to break up your task into micro tasks. Try answering questions like: "How does my Data Frame need to be structured for me to have the right X and Y axis?" "How do I build a basic scatter plot?" "How do I add a label to that scatter plot?" "Where would the labels for that scatter plot come from?". Again! Don't let the magnitude of a programming task scare you off. Ultimately, every programming problem boils down to a handful of smaller, bite-sized tasks.
 
-* Get help when you need it! There is never any shame in asking. But as always, ask a _specific_ question. You'll never get a great answer to: "I'm lost." Good luck!
 
-## Copyright
+```python
+total_fares = data_df["fare"].sum()
+fares_by_type = data_df.groupby(["type"])["fare"].sum()
+fares_by_type = pd.DataFrame(fares_by_type / total_fares * 100)
+fares_by_type = fares_by_type.reset_index()
+fares_by_type = fares_by_type.rename(index=str, columns={"fare":"Percentage of Fares"})
 
-Coding Boot Camp (C) 2016. All Rights Reserved.
+plt.pie(fares_by_type["Percentage of Fares"],explode=[.05,.05,0], colors=["gold","lightcoral","skyblue"],
+        labels=fares_by_type["type"], autopct='%1.1f%%',shadow=True,startangle=180)
+plt.title("% of Total Fares by City Type")
+plt.axis('equal')
+plt.tight_layout()
+plt.show()
+```
+
+
+![png](output_4_0.png)
+
+
+
+```python
+total_rides = data_df["ride_id"].count()
+rides_by_type = data_df.groupby(["type"])["ride_id"].count()
+rides_by_type = pd.DataFrame(rides_by_type / total_rides * 100)
+rides_by_type = rides_by_type.reset_index()
+rides_by_type = rides_by_type.rename(index=str, columns={"ride_id":"Percentage of Rides"})
+
+plt.pie(rides_by_type["Percentage of Rides"],explode=[.05,.05,0], colors=["gold","lightcoral","skyblue"],
+        labels=rides_by_type["type"], autopct='%1.1f%%',shadow=True,startangle=180)
+plt.title("% of Total Rides by City Type")
+plt.axis('equal')
+plt.tight_layout()
+plt.show()
+```
+
+
+![png](output_5_0.png)
+
+
+
+```python
+total_drivers = data_df["driver_count"].sum()
+drivers_grouped = data_df.groupby(["type"])["driver_count"].sum()
+drivers_grouped = pd.DataFrame(drivers_grouped / total_drivers * 100)
+drivers_grouped = drivers_grouped.reset_index()
+drivers_grouped = drivers_grouped.rename(index=str, columns={"driver_count":"Percentage of Drivers"})
+
+plt.pie(drivers_grouped["Percentage of Drivers"],explode=[.05,.05,0], colors=["gold","lightcoral","skyblue"],
+        labels=fares_by_city["type"], autopct='%1.1f%%',shadow=True,startangle=180)
+plt.title("% of Total Drivers by City Type")
+plt.axis('equal')
+plt.tight_layout()
+plt.show()
+```
+
+
+![png](output_6_0.png)
+
+
+
+```python
+
+```
