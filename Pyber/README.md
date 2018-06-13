@@ -1,4 +1,13 @@
 
+# Pyber Ride Sharing
+## Andrew Kling - UNCC HW5
+
+### Analysis
+    - The majority of Pyber's fare revenue (62.7%) comes from Urban areas
+    - There is a clear distinction between rural, suburban and urban driving distances.  Rural fares tend to be the longest rides while urban are the shortest.
+    - The number of drivers in Pyber's fleet is adequately sized to service the number of riders in all city types
+
+
 
 ```python
 #Andrew Kling
@@ -119,30 +128,36 @@ plot_df = city_df.merge(total_rides, how='left',on='city')
 plot_df = plot_df.merge(avg_fare, how='left',on='city')
 ```
 
+# Bubble Plot of Ride Sharing Data
+
 
 ```python
-sizes = [100,150,200,250,300,350,400,450]
+#Create different bucket sizes for number of drivers per city
+sizes = [100,200,300,400,500,600,700,800]
 marker_size = pd.cut(plot_df["driver_count"], [0,10,20,30,40,50,60,70,80],labels=sizes)
 
 sns.lmplot("total_rides","avg_fare",data=plot_df,palette={"Urban":"gold","Suburban":"lightcoral","Rural":"skyblue"},hue='type',
-           legend_out=True,fit_reg=False,scatter_kws={'s':marker_size,'alpha':0.6,'edgecolor':'k'},size=10)
+           legend_out=False,fit_reg=False,scatter_kws={'s':marker_size,'alpha':0.6,'edgecolor':'k'},size=10)
 
-plt.rc('font',size=18)
 plt.rc('font', size=18)          # controls default text sizes
 plt.rc('axes', titlesize=18)     # fontsize of the axes title
 plt.rc('axes', labelsize=18)    # fontsize of the x and y labels
+
 plt.rc('figure', titlesize=18)  # fontsize of the figure title
+plt.rc('legend', fontsize=18)  # fontsize of the figure title
 
-
-plt.title("Pyber Ride Sharing Data (2016)")
+plt.title("Pyber Ride Sharing Data (2016)",fontweight="bold")
 plt.xlabel("Total Number of Riders (Per City)")
 plt.ylabel("Average Fare ($)")
+plt.legend(handletextpad=3)
 plt.show()
 ```
 
 
-![png](output_3_0.png)
+![png](output_5_0.png)
 
+
+# Total Fares by City Type
 
 
 ```python
@@ -153,16 +168,19 @@ fares_by_type = fares_by_type.reset_index()
 fares_by_type = fares_by_type.rename(index=str, columns={"fare":"Percentage of Fares"})
 
 plt.pie(fares_by_type["Percentage of Fares"],explode=[.05,.05,0], colors=["gold","lightcoral","skyblue"],
-        labels=fares_by_type["type"], autopct='%1.1f%%',shadow=True,startangle=180)
-plt.title("% of Total Fares by City Type")
+        labels=fares_by_type["type"], autopct='%1.1f%%',shadow=True,startangle=180, textprops={'fontsize':18})
+plt.title("% of Total Fares by City Type",fontweight="bold")
 plt.axis('equal')
 plt.tight_layout()
+#plt.rcParams.update({'font.size':18})
 plt.show()
 ```
 
 
-![png](output_4_0.png)
+![png](output_7_0.png)
 
+
+# Total Rides by City Type
 
 
 ```python
@@ -173,16 +191,18 @@ rides_by_type = rides_by_type.reset_index()
 rides_by_type = rides_by_type.rename(index=str, columns={"ride_id":"Percentage of Rides"})
 
 plt.pie(rides_by_type["Percentage of Rides"],explode=[.05,.05,0], colors=["gold","lightcoral","skyblue"],
-        labels=rides_by_type["type"], autopct='%1.1f%%',shadow=True,startangle=180)
-plt.title("% of Total Rides by City Type")
+        labels=rides_by_type["type"], autopct='%1.1f%%',shadow=True,startangle=180,textprops={'fontsize':18})
+plt.title("% of Total Rides by City Type",fontweight="bold")
 plt.axis('equal')
 plt.tight_layout()
 plt.show()
 ```
 
 
-![png](output_5_0.png)
+![png](output_9_0.png)
 
+
+# Total Drivers by City Type
 
 
 ```python
@@ -193,18 +213,13 @@ drivers_grouped = drivers_grouped.reset_index()
 drivers_grouped = drivers_grouped.rename(index=str, columns={"driver_count":"Percentage of Drivers"})
 
 plt.pie(drivers_grouped["Percentage of Drivers"],explode=[.05,.05,0], colors=["gold","lightcoral","skyblue"],
-        labels=fares_by_city["type"], autopct='%1.1f%%',shadow=True,startangle=180)
-plt.title("% of Total Drivers by City Type")
+        labels=drivers_grouped["type"], autopct='%1.1f%%',shadow=True,startangle=180, textprops={'fontsize':18})
+plt.title("% of Total Drivers by City Type",fontweight="bold")
 plt.axis('equal')
 plt.tight_layout()
 plt.show()
 ```
 
 
-![png](output_6_0.png)
+![png](output_11_0.png)
 
-
-
-```python
-
-```
